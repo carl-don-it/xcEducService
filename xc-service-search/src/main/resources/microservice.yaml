@@ -1,0 +1,18 @@
+APPLICATION_ID: xc-edu-cloud1.0
+service_description:
+  name: xc-service-search
+  version: 1.0.0
+  properties:
+    allowCrossApp: false
+cse:
+  service:
+    registry:
+      address: https://cse.cn-south-1.myhuaweicloud.com
+      instance:
+        watch: false
+  credentials:
+    accessKey: 7HZKPK8C6V3MFIAJOBVP
+    secretKey: b03ku1V1ohtsxyWQhhqqM7N0mYWAvnLyK9qiTDqq
+    akskCustomCipher: default
+  rest:
+    address: 0.0.0.0:40100

@@ -1,0 +1,34 @@
+server:
+  port: ${PORT:46001}
+spring:
+  application:
+    name: interviewjob-rabbitmq-consumer
+  rabbitmq:
+#    host: ${rabbitmqIP:127.0.0.1}
+#    port: ${rabbitmqPORT:5672}
+#失败后会重新启动消费者
+    #o.s.a.r.l.SimpleMessageListenerContainer - Restarting Consumer@28486680:
+#    tags=[{amq.ctag-NQERIeTUeVU-5ORgRNTv8Q=queue1}], channel=Cached Rabbit Channel:
+#    AMQChannel(amqp://admin@192.168.126.128:5673/,1),
+#    conn: Proxy@2190f524 Shared Rabbit
+#    Connection: SimpleConnection@7815c964 [delegate=amqp://admin@192.168.126.128:5673/, localPort= 50703],
+#    acknowledgeMode=AUTO local queue size=0
+    #连接成功后会选择性连接queue所在节点
+    #o.s.a.r.c.CachingConnectionFactory -
+#    Created new connection: rabbitConnectionFactory
+    #6650813a:1/SimpleConnection@7e875c8 [delegate=amqp://admin@192.168.126.128:5674/, localPort= 50754]
+#    addresses: 192.168.126.128:5672,192.168.126.128:5673,192.168.126.128:5674
+
+    #ha proxy
+    addresses: 192.168.126.128:5670
+    username: admin
+    password: admin
+    virtualHost: /
+
+interview:
+  queue: #queue_inform_email_1
+    email: ${QUEUE_INFORM_EMAIL:queue1}
+    sms: ${QUEUE_INFORM_SMS:queue_inform_sms_1}
+  routingkey:
+    email: ${ROUTINGKEY_EMAIL:interview}
+    sms: ${ROUTINGKEY_SMS:interview}

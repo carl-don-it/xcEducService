@@ -1,0 +1,11 @@
+server:
+  port: ${PORT:45000}
+spring:
+  application:
+    name: interviewjob-rabbitmq-producer
+  rabbitmq:
+    host: ${rabbitmqIP:192.168.72.142}
+    port: ${rabbitmqPORT:5672}
+    username: admin
+    password: admin
+    virtualHost: /

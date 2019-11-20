@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>xc-framework-parent</artifactId>
+        <groupId>com.xuecheng</groupId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../xc-framework-parent/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>interviewjob-rabbitmq-producer</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!--在windows本地mvn 并且push-->
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!--docker的mav en插件，官网：https://github.com/spotify/docker-maven-plugin-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <!--docker镜像相关的 配置 信息-->
+                <configuration>
+                    <!--同时指定私有仓库的位置，镜像名字，镜像tag “/ :”-->
+                    <!--<imageName>192.168.72.142:5000/${project.artifactId}</imageName>-->
+                    <imageName>${project.artifactId}:${project.version}</imageName>
+                    <maintainer>tjr.seeker@gmail.com</maintainer>
+                    <baseImage>jdk1.8</baseImage>
+                    <entryPoint>["java","-jar", "/${project.build.finalName}.jar"]</entryPoint><!--和下面targetPath对应-->
+                    <workdir>/home</workdir>
+                    <imageTags>
+                        <imageTag>imageTag_1</imageTag>
+                    </imageTags>
+                    <!-- 这里是复制 jar 包到 docker 容器指定目录配置,使用add命令 -->
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                    <!--远程使用docker，底层还需要docker支持，也可以环境变量设置-->
+                    <dockerHost>http://192.168.72.144:2375</dockerHost>
+                </configuration>
+                <!--不会自动push,使用maven命令push-->
+                <!--     mvn -f pom_inside_window.xml clean  package -DskipTests docker:build -DpushImage   -->
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
