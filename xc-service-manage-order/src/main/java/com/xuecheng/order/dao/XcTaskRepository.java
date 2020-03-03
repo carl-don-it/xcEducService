@@ -26,3 +26,4 @@ public interface XcTaskRepository extends JpaRepository<XcTask, String> {
 	public int updateTaskTime(@Param(value = "id") String id, @Param(value = "updateTime") Date updateTime);
 
 }
+

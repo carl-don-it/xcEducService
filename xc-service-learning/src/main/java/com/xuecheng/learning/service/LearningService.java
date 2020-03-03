@@ -27,75 +27,73 @@ import java.util.Optional;
 @Service
 public class LearningService {
 
-	@Autowired
-	private CourseSearchClient courseSearchClient;
-	@Autowired
-	private XcTaskHisRepository xcTaskHisRepository;
-	@Autowired
-	private XcLearningCourseRepository xcLearningCourseRepository;
+    @Autowired
+    private CourseSearchClient courseSearchClient;
+    @Autowired
+    private XcTaskHisRepository xcTaskHisRepository;
+    @Autowired
+    private XcLearningCourseRepository xcLearningCourseRepository;
 
-	//获取课程学习地址（视频播放地址）
-	public GetMediaResult getmedia(String courseId, String teachplanId) {
-		//校验学生的学生权限...
+    //获取课程学习地址（视频播放地址）
+    public GetMediaResult getmedia(String courseId, String teachplanId) {
+        //校验学生的学生权限...
 
-		//远程调用搜索服务查询课程计划所对应的课程媒资信息
-		TeachplanMediaPub teachplanMediaPub = courseSearchClient.getmedia(teachplanId);
-		if (teachplanMediaPub == null || StringUtils.isEmpty(teachplanMediaPub.getMediaUrl())) {
-			//获取学习地址错误
-			ExceptionCast.cast(LearningCode.LEARNING_GETMEDIA_ERROR);
-		}
-		return new GetMediaResult(CommonCode.SUCCESS, teachplanMediaPub.getMediaUrl());
-	}
+        //远程调用搜索服务查询课程计划所对应的课程媒资信息
+        TeachplanMediaPub teachplanMediaPub = courseSearchClient.getmedia(teachplanId);
+        if (teachplanMediaPub == null || StringUtils.isEmpty(teachplanMediaPub.getMediaUrl())) {
+            //获取学习地址错误
+            ExceptionCast.cast(LearningCode.LEARNING_GETMEDIA_ERROR);
+        }
+        return new GetMediaResult(CommonCode.SUCCESS, teachplanMediaPub.getMediaUrl());
+    }
 
-	/**
-	 * 根据xctask添加选课,有就添加发送,无就发送
-	 *
-	 * @param xcTask
-	 */
-	@Transactional
-	public boolean addCourse(String userId, String courseId, String valid, Date startTime, Date endTime, XcTask xcTask) {
+    /**
+     * 根据xcTask添加选课,有就添加发送,无就发送
+     */
+    @Transactional
+    public boolean addCourse(String userId, String courseId, String valid, Date startTime, Date endTime, XcTask xcTask) {
 
-		//2. 查看历史任务表
-		Optional<XcTaskHis> xcTaskHisOptional = xcTaskHisRepository.findById(xcTask.getId());
-		if (xcTaskHisOptional.isPresent()) {
-			return true;
-		} else {
-			//添加选课
-			if (StringUtils.isEmpty(courseId)) {
-				ExceptionCast.cast(LearningCode.LEARNING_GETMEDIA_ERROR);
-			}
-			if (StringUtils.isEmpty(userId)) {
-				ExceptionCast.cast(LearningCode.CHOOSECOURSE_USERISNULl);
-			}
-			//3. 查询是否已有选课,避免重复添加,双重保险
-			XcLearningCourse xcLearningCourse =
-					xcLearningCourseRepository.findXcLearningCourseByUserIdAndCourseId(userId, courseId);
-			if (xcLearningCourse == null) {
-				//没有选课记录则添加
-				xcLearningCourse = new XcLearningCourse();
-				xcLearningCourse.setUserId(userId);
-				xcLearningCourse.setCourseId(courseId);
-				xcLearningCourse.setStartTime(startTime);
-				xcLearningCourse.setEndTime(endTime);
-				xcLearningCourse.setStatus("501001");
-				xcLearningCourseRepository.save(xcLearningCourse);
-			} else {
-				//有选课记录则更新日期
-				xcLearningCourse.setValid(valid);
-				xcLearningCourse.setStartTime(startTime);
-				xcLearningCourse.setEndTime(endTime);
-				xcLearningCourse.setStatus("501001");
-				xcLearningCourseRepository.save(xcLearningCourse);
-			}
-			//保存历史任务
-			XcTaskHis xcTaskHis = new XcTaskHis();
-			BeanUtils.copyProperties(xcTask, xcTaskHis);
-			xcTaskHisRepository.save(xcTaskHis);
+        //2. 查看历史任务表
+        Optional<XcTaskHis> xcTaskHisOptional = xcTaskHisRepository.findById(xcTask.getId());
+        if (xcTaskHisOptional.isPresent()) {
+            return true;
+        } else {
+            //添加选课
+            if (StringUtils.isEmpty(courseId)) {
+                ExceptionCast.cast(LearningCode.LEARNING_GETMEDIA_ERROR);
+            }
+            if (StringUtils.isEmpty(userId)) {
+                ExceptionCast.cast(LearningCode.CHOOSECOURSE_USERISNULl);
+            }
+            //3. 查询是否已有选课,避免重复添加,双重保险
+            // todo 上面没什么意义：如果高并发，那么这里也有可能是两个服务器同时插入，所以要么设置userId和courseId唯一约束，要么加分布式锁
+            XcLearningCourse xcLearningCourse =
+                    xcLearningCourseRepository.findXcLearningCourseByUserIdAndCourseId(userId, courseId);
 
-			//发送mq成功信息
-			return true;
+            if (xcLearningCourse == null) {
+                //没有选课记录则添加
+                xcLearningCourse = new XcLearningCourse();
+                xcLearningCourse.setUserId(userId);
+                xcLearningCourse.setCourseId(courseId);
+                xcLearningCourse.setStartTime(startTime);
+                xcLearningCourse.setEndTime(endTime);
+                xcLearningCourse.setStatus("501001");
+                xcLearningCourseRepository.save(xcLearningCourse);
+            } else {
+                //有选课记录则更新日期
+                xcLearningCourse.setValid(valid);
+                xcLearningCourse.setStartTime(startTime);
+                xcLearningCourse.setEndTime(endTime);
+                xcLearningCourse.setStatus("501001");
+                xcLearningCourseRepository.save(xcLearningCourse);
+            }
+            //4. 保存历史任务
+            XcTaskHis xcTaskHis = new XcTaskHis();
+            BeanUtils.copyProperties(xcTask, xcTaskHis);
+            xcTaskHisRepository.save(xcTaskHis);
 
-		}
-
-	}
+            //5. 添加选课成功
+            return true;
+        }
+    }
 }

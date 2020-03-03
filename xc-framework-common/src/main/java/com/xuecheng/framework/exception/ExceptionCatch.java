@@ -13,12 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 异常捕获类
- *
- * @author Walker_Don
- * @version V1.0
- * @Description TODO
- * @ClassName ExceptionCatch
- * @date 2019年06月15日 上午 10:44
  */
 @ControllerAdvice//控制器增强
 public class ExceptionCatch {

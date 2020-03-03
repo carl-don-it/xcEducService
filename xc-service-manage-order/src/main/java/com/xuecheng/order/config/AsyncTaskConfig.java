@@ -12,6 +12,8 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import java.util.concurrent.Executor;
 
 /**
+ * spring-task异步执行的配置
+ *
  * @author Walker_Don
  * @version V1.0
  * @Description TODO
@@ -21,30 +23,29 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableScheduling
 public class AsyncTaskConfig implements SchedulingConfigurer, AsyncConfigurer {
-	//线程池线程数量
-	private int corePoolSize = 5;
+    //线程池线程数量
+    private int corePoolSize = 5;
 
-	@Bean
-	public ThreadPoolTaskScheduler taskScheduler() {
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-		scheduler.initialize();//初始化线程池
-		scheduler.setPoolSize(corePoolSize);//线程池容量
-		return scheduler;
-	}
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.initialize();//初始化线程池
+        scheduler.setPoolSize(corePoolSize);//线程池容量
+        return scheduler;
+    }
 
-	@Override
-	public Executor getAsyncExecutor() {
-		Executor executor = taskScheduler();
-		return executor;
-	}
+    @Override
+    public Executor getAsyncExecutor() {
+        return taskScheduler();
+    }
 
-	@Override
-	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-		return null;
-	}
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return null;
+    }
 
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-		scheduledTaskRegistrar.setTaskScheduler(taskScheduler());
-	}
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
+        scheduledTaskRegistrar.setTaskScheduler(taskScheduler());
+    }
 }

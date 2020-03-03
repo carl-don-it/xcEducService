@@ -31,6 +31,7 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
 	private DataSource dataSource;
+
 	@Autowired
 	UserDetailsService userDetailsService;
 
@@ -44,9 +45,6 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 	@Autowired
 	AuthenticationManager authenticationManager;
 
-	@Autowired
-	private CustomUserAuthenticationConverter customUserAuthenticationConverter;
-
 	//读取密钥的配置
 	@Bean("keyProp")
 	public KeyProperties keyProperties() {
@@ -56,12 +54,12 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 	@Resource(name = "keyProp")
 	private KeyProperties keyProperties;
 
-	//客户端配置
 	@Bean
 	public ClientDetailsService clientDetails() {
 		return new JdbcClientDetailsService(dataSource);
 	}
 
+	//客户端配置，怎么查找客户端client
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.jdbc(this.dataSource).clients(this.clientDetails());
@@ -102,7 +100,7 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 		//配置自定义的CustomUserAuthenticationConverter
 		DefaultAccessTokenConverter accessTokenConverter = (DefaultAccessTokenConverter) converter.getAccessTokenConverter();
 		accessTokenConverter.setUserTokenConverter(customUserAuthenticationConverter);
-		return converter;
+					return converter;
 	}
 
 	//授权服务器端点配置
