@@ -1,1 +1,1 @@
-model模块中放的都是framework包中的domain
+model模块中放的都是framework包中的domain，从common抽离出来是因为依赖

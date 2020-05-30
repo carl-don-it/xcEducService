@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @ControllerAdvice//控制器增强
 public class ExceptionCatch {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionCatch.class);
 
 	//使用EXCEPTIONS存放异常类型和错误代码的映射，ImmutableMap的特点的一旦创建不可改变，并且线程安全
